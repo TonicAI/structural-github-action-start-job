@@ -21,9 +21,6 @@ jobs:
   start-generation:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Start Generation Job
         id: start-job
         uses: TonicAI/structural-start-job@v1

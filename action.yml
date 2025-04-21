@@ -75,7 +75,7 @@ runs:
         response=$(curl -s -X POST \
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
           -H "Content-Type: application/json" \
-          -H "Authorization: Bearer ${{ inputs.api_key }}" \
+          -H "Authorization: APIKEY ${{ inputs.api_key }}" \
           -d "${request_body}")
 
         # Extract the job ID from the response
