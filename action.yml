@@ -1,0 +1,92 @@
+name: 'Structural Start Job'
+description: 'Starts a generation job using the Tonic API and returns the job ID'
+branding:
+  icon: "play"
+  color: "blue"
+inputs:
+  workspace_id:
+    description: 'The workspace ID (GUID) for which to start a generation job'
+    required: true
+  api_key:
+    description: 'Tonic API key'
+    required: true
+  api_url:
+    description: 'Tonic API base URL'
+    required: false
+    default: 'https://app.tonic.ai'
+  strict_mode:
+    description: 'Specifies whether or not to allow a job to run when unresolved schema changes are present. See https://app.tonic.ai/apidocs/index.html#/GenerateData/StartGenerateData for more information'
+    required: false
+    type: choice
+    options:
+      - "NotStrict"
+      - "RejectOnSchemaActions"
+      - "RejectOnAllSchemaItems"
+      - "NotApplicable"
+  diagnostic_logging:
+    description: 'Enables diagnostic logging'
+    required: false
+    type: boolean
+    default: false
+outputs:
+  job_id:
+    description: 'The ID of the started generation job'
+    value: ${{ steps.start-job.outputs.job_id }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Start generation job
+      id: start-job
+      shell: bash
+      run: |
+        # Install jq if not available
+        if ! command -v jq &> /dev/null; then
+          echo "jq is not installed. Attempting to install..."
+          if command -v apt-get &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          elif command -v yum &> /dev/null; then
+            sudo yum install -y jq
+          elif command -v brew &> /dev/null; then
+            brew install jq
+          else
+            echo "Error: Unable to install jq. Please install it manually." >&2
+            exit 1
+          fi
+        fi
+        
+        # Build request body JSON
+        request_body='{'
+        request_body+='"workspaceId": "${{ inputs.workspace_id }}"'
+        
+        # Add optional parameters if provided
+        if [ -n "${{ inputs.strict_mode }}" ]; then
+          request_body+=',"strictMode": ${{ inputs.strict_mode }}'
+        fi
+        
+        # Since diagnostic_logging is now a boolean type, we can use it directly
+        if ${{ inputs.diagnostic_logging }}; then
+          request_body+=',"diagnosticLogging": true'
+        fi
+        
+        # Complete the JSON object
+        request_body+='}'
+        
+        # Start the generation job
+        response=$(curl -s -X POST \
+          "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ inputs.api_key }}" \
+          -d "${request_body}")
+        
+        # Extract the job ID from the response
+        job_id=$(echo "$response" | jq -r '.id')
+        
+        # Check if the job ID was extracted correctly
+        if [ -z "$job_id" ] || [ "$job_id" = "null" ]; then
+          echo "Error: Failed to start generation job. API response: $response" >&2
+          exit 1
+        fi
+        
+        # Set the output variable with the job ID
+        echo "job_id=$job_id" >> $GITHUB_OUTPUT
+        echo "Successfully started generation job with ID: $job_id"
