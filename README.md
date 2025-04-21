@@ -1,6 +1,6 @@
 # Start Generation Job
 
-This action starts a generation job for a specified workspace and returns the job ID.
+This action starts a data generation job for a specified workspace and returns the job ID.
 
 ## Inputs
 
