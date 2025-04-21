@@ -53,40 +53,40 @@ runs:
             exit 1
           fi
         fi
-        
+
         # Build request body JSON
         request_body='{'
         request_body+='"workspaceId": "${{ inputs.workspace_id }}"'
-        
+
         # Add optional parameters if provided
         if [ -n "${{ inputs.strict_mode }}" ]; then
           request_body+=',"strictMode": ${{ inputs.strict_mode }}'
         fi
-        
+
         # Since diagnostic_logging is now a boolean type, we can use it directly
         if ${{ inputs.diagnostic_logging }}; then
           request_body+=',"diagnosticLogging": true'
         fi
-        
+
         # Complete the JSON object
         request_body+='}'
-        
+
         # Start the generation job
         response=$(curl -s -X POST \
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer ${{ inputs.api_key }}" \
           -d "${request_body}")
-        
+
         # Extract the job ID from the response
         job_id=$(echo "$response" | jq -r '.id')
-        
+
         # Check if the job ID was extracted correctly
         if [ -z "$job_id" ] || [ "$job_id" = "null" ]; then
           echo "Error: Failed to start generation job. API response: $response" >&2
           exit 1
         fi
-        
+
         # Set the output variable with the job ID
         echo "job_id=$job_id" >> $GITHUB_OUTPUT
         echo "Successfully started generation job with ID: $job_id"

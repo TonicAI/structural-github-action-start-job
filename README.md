@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Start Generation Job
         id: start-job
         uses: TonicAI/structural-start-job@v1
@@ -31,7 +31,7 @@ jobs:
           workspace_id: ${{ secrets.TONIC_WORKSPACE_ID }}
           api_key: ${{ secrets.TONIC_API_KEY }}
           strict_mode: "RejectOnSchemaActions"
-      
+
       - name: Print Job ID
         run: echo "Started job with ID ${{ steps.start-job.outputs.job_id }}"
 ```
