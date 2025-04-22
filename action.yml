@@ -78,7 +78,9 @@ runs:
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
           -H "Content-Type: application/json" \
           -H "Authorization: APIKEY ${{ inputs.api_key }}" \
-          -d "'"${request_body}"'")
+          -d "'"${request_body}"'" || { echo "Curl command failed. Response: $?"; exit 1; })
+
+        echo "API Response: $response"
 
         # Extract the job ID from the response
         job_id=$(echo "$response" | jq -r '.id')
