@@ -71,14 +71,14 @@ runs:
         # Complete the JSON object
         request_body+='}'
 
-        echo "${request_body}"
+        echo '${request_body}'
 
         # Start the generation job
         response=$(curl -s -X POST \
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
           -H "Content-Type: application/json" \
           -H "Authorization: APIKEY ${{ inputs.api_key }}" \
-          -d "${request_body}")
+          -d '${request_body}')
 
         # Extract the job ID from the response
         job_id=$(echo "$response" | jq -r '.id')
