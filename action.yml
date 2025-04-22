@@ -54,31 +54,26 @@ runs:
           fi
         fi
 
-        # Build request body JSON
-        request_body='{'
-        request_body+='"workspaceId": "${{ inputs.workspace_id }}"'
+        # Build query string parameters
+        query_params="workspaceId=${{ inputs.workspace_id }}"
 
         # Add optional parameters if provided
         if [ -n "${{ inputs.strict_mode }}" ]; then
-          request_body+=',"strictMode": "${{ inputs.strict_mode }}"'
+          query_params+="&strictMode=${{ inputs.strict_mode }}"
         fi
 
         # Since diagnostic_logging is now a boolean type, we can use it directly
         if ${{ inputs.diagnostic_logging }}; then
-          request_body+=',"diagnosticLogging": "true"'
+          query_params+="&diagnosticLogging=true"
         fi
 
-        # Complete the JSON object
-        request_body+='}'
-
-        echo "'"${request_body}"'"
+        echo "Query parameters: ${query_params}"
 
         # Start the generation job
         response=$(curl -s -X POST \
-          "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
-          -H "Content-Type: application/json" \
+          "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0&${query_params}" \
           -H "Authorization: APIKEY ${{ inputs.api_key }}" \
-          -d "'"${request_body}"'" || { echo "Curl command failed. Response: $?"; exit 1; })
+          || { echo "Curl command failed. Response: $?"; exit 1; })
 
         echo "API Response: $response"
 
