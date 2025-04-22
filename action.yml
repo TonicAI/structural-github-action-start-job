@@ -54,24 +54,25 @@ runs:
           fi
         fi
 
-        # Build request body JSON
-        request_body='{'
-        request_body+='"workspaceId": "${{ inputs.workspace_id }}"'
+        # Build request body JSON using jq
+        jq_payload='{workspaceId: $workspace_id}'
 
         # Add optional parameters if provided
         if [ -n "${{ inputs.strict_mode }}" ]; then
-          request_body+=',"strictMode": ${{ inputs.strict_mode }}'
+          jq_payload=$(echo $jq_payload | jq '. + {strictMode: $strict_mode}')
         fi
 
         # Since diagnostic_logging is now a boolean type, we can use it directly
         if ${{ inputs.diagnostic_logging }}; then
-          request_body+=',"diagnosticLogging": true'
+          jq_payload=$(echo $jq_payload | jq '. + {diagnosticLogging: true}')
         fi
 
-        # Complete the JSON object
-        request_body+='}'
+        # Create properly formatted JSON
+        request_body=$(echo '{}' | jq --arg workspace_id "${{ inputs.workspace_id }}" \
+                                    --arg strict_mode "${{ inputs.strict_mode }}" \
+                                    "$jq_payload")
 
-        echo "${request_body}"
+        echo "Request body: ${request_body}"
 
         # Start the generation job
         response=$(curl -s -X POST \
