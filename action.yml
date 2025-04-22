@@ -60,7 +60,7 @@ runs:
 
         # Add optional parameters if provided
         if [ -n "${{ inputs.strict_mode }}" ]; then
-          request_body+=',"strictMode": ${{ inputs.strict_mode }}'
+          request_body+=',"strictMode": "${{ inputs.strict_mode }}"'
         fi
 
         # Since diagnostic_logging is now a boolean type, we can use it directly
@@ -78,7 +78,7 @@ runs:
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
           -H "Content-Type: application/json" \
           -H "Authorization: APIKEY ${{ inputs.api_key }}" \
-          -d "'"${request_body}"'"")
+          -d "'"${request_body}"'")
 
         # Extract the job ID from the response
         job_id=$(echo "$response" | jq -r '.id')
