@@ -71,6 +71,8 @@ runs:
         # Complete the JSON object
         request_body+='}'
 
+        echo "${request_body}"
+
         # Start the generation job
         response=$(curl -s -X POST \
           "${{ inputs.api_url }}/api/GenerateData/start?api-version=v2024.01.0" \
