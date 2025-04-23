@@ -1,5 +1,5 @@
 name: 'Structural Start Job'
-description: 'Starts a generation job using the Tonic API and returns the job ID'
+description: 'Starts a generation job using the Structural API and returns the job ID'
 branding:
   icon: "play"
   color: "blue"
@@ -8,10 +8,10 @@ inputs:
     description: 'The workspace ID (GUID) for which to start a generation job'
     required: true
   api_key:
-    description: 'Tonic API key'
+    description: 'Structural API key'
     required: true
   api_url:
-    description: 'Tonic API base URL'
+    description: 'Structural API base URL'
     required: false
     default: 'https://app.tonic.ai'
   strict_mode:
